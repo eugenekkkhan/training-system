@@ -1,6 +1,6 @@
 const ru = {
   nav: {
-    title: 'Тренировка',
+    title: 'traapp',
     dashboard: 'Панель',
     study: 'Учёба',
     logs: 'Журналы',

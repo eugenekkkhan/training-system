@@ -1,6 +1,6 @@
 const en = {
   nav: {
-    title: 'Training',
+    title: 'traapp',
     dashboard: 'Dashboard',
     study: 'Study',
     logs: 'Logs',
