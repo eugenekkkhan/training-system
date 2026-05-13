@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 import { cardsApi, logsApi, submissionsApi } from '../api/client';
+import { Latex } from '../components/Latex';
 import type { CardWithDisplay, SubmissionResult } from '../types';
 
 // ── Interval helpers ──────────────────────────────────────────────────────────
@@ -125,7 +126,7 @@ function CardView({ card, onResult }: CardViewProps) {
       {/* Question */}
       <div className="study-question">
         <p className="question-label">{t('study.question')}</p>
-        <p className="question-text">{card.question}</p>
+        <p className="question-text">{card.templateId ? <Latex>{card.question}</Latex> : card.question}</p>
       </div>
 
       {/* Hint */}
@@ -133,7 +134,8 @@ function CardView({ card, onResult }: CardViewProps) {
         <div className="hint-area">
           {showHint ? (
             <div className="hint-text">
-              <strong>{t('study.hintLabel')}</strong> {card.hint}
+              <strong>{t('study.hintLabel')}</strong>{' '}
+              {card.templateId ? <Latex>{card.hint!}</Latex> : card.hint}
             </div>
           ) : (
             <button
@@ -160,7 +162,7 @@ function CardView({ card, onResult }: CardViewProps) {
                 disabled={submitMutation.isPending}
               >
                 <span className="choice-key">{i + 1}</span>
-                {choice}
+                {card.templateId ? <Latex>{choice}</Latex> : choice}
               </button>
             ))}
           </div>
@@ -203,12 +205,14 @@ function CardView({ card, onResult }: CardViewProps) {
           )}
 
           <div className="correct-answer">
-            <strong>{t('study.correctAnswer')}</strong> {String(card.answer ?? '')}
+            <strong>{t('study.correctAnswer')}</strong>{' '}
+            {card.templateId ? <Latex>{String(card.answer ?? '')}</Latex> : String(card.answer ?? '')}
           </div>
 
           {!isCorrect && card.explanation && (
             <div className="explanation">
-              <strong>{t('study.explanationLabel')}</strong> {card.explanation}
+              <strong>{t('study.explanationLabel')}</strong>{' '}
+              {card.templateId ? <Latex>{card.explanation!}</Latex> : card.explanation}
             </div>
           )}
 
