@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { Spinner } from './Spinner';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,7 +10,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { token, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div className="loading-screen">Loading...</div>;
+    return <Spinner />;
   }
 
   if (!token) {

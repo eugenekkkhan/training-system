@@ -1,4 +1,4 @@
-import { IsBoolean, IsNumber, IsOptional, Min } from 'class-validator';
+import { IsBoolean, IsNumber, IsObject, IsOptional, Min } from 'class-validator';
 
 export class UpdateSettingsDto {
   @IsOptional()
@@ -9,4 +9,8 @@ export class UpdateSettingsDto {
   @IsOptional()
   @IsBoolean()
   notificationsEnabled?: boolean;
+
+  @IsOptional()
+  @IsObject()
+  customColors?: Record<string, string>;
 }

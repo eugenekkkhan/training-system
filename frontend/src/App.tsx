@@ -1,5 +1,9 @@
+import { useState } from 'react';
+import { MdMenu } from 'react-icons/md';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Spinner } from './components/Spinner';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Nav } from './components/Nav';
 import { useAuth } from './contexts/AuthContext';
@@ -13,7 +17,24 @@ import { Templates } from './pages/Templates';
 import { Settings } from './pages/Settings';
 
 function AppLayout() {
-  const { token } = useAuth();
+  const { token, isLoading } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    const stored = localStorage.getItem('sidebarOpen');
+    if (stored !== null) return stored === 'true';
+    return window.innerWidth > 768;
+  });
+
+  const toggleSidebar = () => {
+    const next = !sidebarOpen;
+    localStorage.setItem('sidebarOpen', String(next));
+    setSidebarOpen(next);
+  };
+
+  const handleNavigate = () => {
+    if (window.innerWidth <= 768) setSidebarOpen(false);
+  };
+
+  if (isLoading) return <Spinner />;
 
   if (!token) {
     return (
@@ -27,8 +48,18 @@ function AppLayout() {
 
   return (
     <div className="app-layout">
-      <Nav />
+      <Nav isOpen={sidebarOpen} onToggle={toggleSidebar} onNavigate={handleNavigate} />
+      {sidebarOpen && <div className="sidebar-backdrop" onClick={toggleSidebar} />}
       <main className="main-content">
+        {!sidebarOpen && (
+          <button
+            className="sidebar-open-btn"
+            onClick={toggleSidebar}
+            aria-label="Open menu"
+          >
+            <MdMenu size={20} />
+          </button>
+        )}
         <Routes>
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/study" element={<ProtectedRoute><Study /></ProtectedRoute>} />
@@ -47,8 +78,10 @@ function AppLayout() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppLayout />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppLayout />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

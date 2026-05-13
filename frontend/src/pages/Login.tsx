@@ -11,7 +11,12 @@ export function Login() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  const handleLanguageChange = (lang: string) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem('lang', lang);
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -65,6 +70,22 @@ export function Login() {
         <p className="auth-footer">
           {t('login.noAccount')} <Link to="/register">{t('login.register')}</Link>
         </p>
+        <div className="auth-lang-switcher">
+          <button
+            type="button"
+            className={`auth-lang-btn${i18n.language === 'en' ? ' active' : ''}`}
+            onClick={() => handleLanguageChange('en')}
+          >
+            English
+          </button>
+          <button
+            type="button"
+            className={`auth-lang-btn${i18n.language === 'ru' ? ' active' : ''}`}
+            onClick={() => handleLanguageChange('ru')}
+          >
+            Русский
+          </button>
+        </div>
       </div>
     </div>
   );

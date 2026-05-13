@@ -165,6 +165,7 @@ export const usersApi = {
   updateSettings: async (payload: {
     dailyGoal?: number;
     notificationsEnabled?: boolean;
+    customColors?: Record<string, string>;
   }): Promise<User> => {
     const { data } = await api.patch('/users/settings', payload);
     return data;

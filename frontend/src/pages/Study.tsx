@@ -1,15 +1,18 @@
 import { useState, useEffect, useRef, useCallback, FormEvent } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 import { cardsApi, logsApi, submissionsApi } from '../api/client';
 import { Latex } from '../components/Latex';
+import { Card } from '../components/Card';
+import { Button, LinkButton } from '../components/Button';
+import { Spinner } from '../components/Spinner';
 import type { CardWithDisplay, SubmissionResult } from '../types';
 
 // ── Interval helpers ──────────────────────────────────────────────────────────
 
 function computeNextDays(progress: any, quality: number): number {
-  if (quality < 3) return 0; // relearning
+  if (quality < 3) return 0;
   const interval = progress?.interval ?? 1;
   const easeFactor = progress?.easeFactor ?? 2.5;
   if (interval === 1) return 6;
@@ -57,7 +60,6 @@ function CardView({ card, onResult }: CardViewProps) {
       submissionsApi.submit(payload),
   });
 
-  // Always-fresh ref so keyboard handler doesn't capture stale closures
   const submitRef = useRef<(quality: number) => void>(() => {});
   submitRef.current = (quality: number) => {
     if (submitMutation.isPending || ratedQuality !== null) return;
@@ -79,7 +81,6 @@ function CardView({ card, onResult }: CardViewProps) {
     setPhase('rating');
   };
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -87,13 +88,11 @@ function CardView({ card, onResult }: CardViewProps) {
       const inInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
 
       if (phase === 'input' && !inInput) {
-        // H = toggle hint
         if (e.key.toLowerCase() === 'h' && card.hint) {
           e.preventDefault();
           setShowHint((v) => !v);
           return;
         }
-        // 1–N = select choice
         if (card.choices && card.choices.length > 0 && !submitMutation.isPending) {
           const idx = parseInt(e.key) - 1;
           if (idx >= 0 && idx < card.choices.length) {
@@ -122,7 +121,7 @@ function CardView({ card, onResult }: CardViewProps) {
   }, [phase, card.hint, card.choices, submitMutation.isPending]);
 
   return (
-    <div className="study-card card">
+    <Card variant="elevated" pad="md" className="study-card">
       {/* Question */}
       <div className="study-question">
         <p className="question-label">{t('study.question')}</p>
@@ -138,13 +137,13 @@ function CardView({ card, onResult }: CardViewProps) {
               {card.templateId ? <Latex>{card.hint!}</Latex> : card.hint}
             </div>
           ) : (
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
+            <Button
+              variant="subtle"
+              size="sm"
               onClick={() => setShowHint(true)}
             >
               {t('study.showHint')} <kbd className="kbd-hint">H</kbd>
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -180,13 +179,13 @@ function CardView({ card, onResult }: CardViewProps) {
                 disabled={submitMutation.isPending}
               />
             </div>
-            <button
+            <Button
               type="submit"
-              className="btn btn-primary"
+              variant="primary"
               disabled={submitMutation.isPending || !userAnswer.trim()}
             >
               {t('study.submit')} <kbd className="kbd-hint">↵</kbd>
-            </button>
+            </Button>
           </form>
         ))}
 
@@ -250,7 +249,7 @@ function CardView({ card, onResult }: CardViewProps) {
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -290,7 +289,6 @@ export function Study() {
       const [current, ...rest] = prev.queue;
       const isFirstTime = !prev.seenIds.has(current.id);
       const newSeenIds = new Set([...prev.seenIds, current.id]);
-      // relearning = quality < 3: send card to back of queue
       const failed = result.progress?.state === 'relearning';
       return {
         queue: failed ? [...rest, current] : rest,
@@ -326,7 +324,7 @@ export function Study() {
     const relearned = session.total - session.firstTryCorrect;
     return (
       <div className="page">
-        <div className="session-complete card">
+        <Card variant="elevated" pad="lg" className="session-complete">
           <div className="session-complete-icon">✓</div>
           <h2>{t('study.sessionComplete')}</h2>
           <div className="session-score">
@@ -341,14 +339,14 @@ export function Study() {
             </p>
           )}
           <div className="session-actions">
-            <button className="btn btn-primary" onClick={handleSessionComplete}>
+            <Button variant="primary" onClick={handleSessionComplete}>
               {t('study.done')}
-            </button>
-            <Link to="/" className="btn btn-secondary">
+            </Button>
+            <LinkButton to="/" variant="secondary">
               {t('study.goToDashboard')}
-            </Link>
+            </LinkButton>
           </div>
-        </div>
+        </Card>
       </div>
     );
   }
@@ -361,7 +359,7 @@ export function Study() {
         <div className="page-header">
           <h1>{t('study.title')}</h1>
         </div>
-        <div className="card session-start">
+        <Card variant="elevated" pad="lg" className="session-start">
           <h3>{t('study.readyTitle')}</h3>
 
           {logs && logs.length > 0 && (
@@ -383,13 +381,13 @@ export function Study() {
           )}
 
           {isLoading ? (
-            <p className="loading">{t('study.loadingCards')}</p>
+            <Spinner />
           ) : !dueCards || dueCards.length === 0 ? (
             <>
               <p className="session-start-desc">{t('study.noDueDesc')}</p>
-              <Link to="/logs" className="btn btn-secondary">
+              <LinkButton to="/logs" variant="secondary">
                 {t('study.browseLogs')}
-              </Link>
+              </LinkButton>
             </>
           ) : (
             <>
@@ -401,12 +399,12 @@ export function Study() {
                   components={{ strong: <strong /> }}
                 />
               </p>
-              <button className="btn btn-primary" onClick={startSession}>
+              <Button variant="primary" onClick={startSession}>
                 {t('study.startSession')}
-              </button>
+              </Button>
             </>
           )}
-        </div>
+        </Card>
       </div>
     );
   }

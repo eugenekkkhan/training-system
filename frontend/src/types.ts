@@ -10,6 +10,7 @@ export interface UserSettings {
   dailyGoal: number;
   notificationsEnabled: boolean;
   pushSubscription?: any;
+  customColors?: Record<string, string>;
 }
 
 export interface Template {

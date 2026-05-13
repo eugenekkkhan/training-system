@@ -1,15 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { statsApi, cardsApi } from '../api/client';
+import { Card } from '../components/Card';
+import { LinkButton } from '../components/Button';
+import { Spinner } from '../components/Spinner';
 import type { DailyActivity } from '../types';
 
 function getHeatmapColor(count: number): string {
-  if (count === 0) return '#ebedf0';
-  if (count < 5) return '#9be9a8';
-  if (count < 10) return '#40c463';
-  if (count < 20) return '#30a14e';
-  return '#216e39';
+  if (count === 0) return 'color-mix(in srgb, var(--primary) 8%, var(--bg))';
+  if (count < 5)  return 'color-mix(in srgb, var(--primary) 25%, transparent)';
+  if (count < 10) return 'color-mix(in srgb, var(--primary) 50%, transparent)';
+  if (count < 20) return 'color-mix(in srgb, var(--primary) 75%, transparent)';
+  return 'var(--primary)';
 }
 
 function buildHeatmapGrid(activities: DailyActivity[]): Array<{ date: string; count: number }[]> {
@@ -102,16 +104,16 @@ export function Dashboard() {
         <h1>{t('dashboard.title')}</h1>
       </div>
 
-      <div className="card study-banner">
+      <Card variant="tinted" pad="md" className="study-banner">
         {dueCount > 0 ? (
           <>
             <div>
               <h3>{t('dashboard.readyToStudy')}</h3>
               <p>{t('dashboard.cardsDue', { count: dueCount })}</p>
             </div>
-            <Link to="/study" className="btn btn-primary">
+            <LinkButton to="/study" variant="primary">
               {t('dashboard.startReview')}
-            </Link>
+            </LinkButton>
           </>
         ) : (
           <>
@@ -119,56 +121,56 @@ export function Dashboard() {
               <h3>{t('dashboard.allCaughtUp')}</h3>
               <p>{t('dashboard.noDue')}</p>
             </div>
-            <Link to="/logs" className="btn btn-secondary">
+            <LinkButton to="/logs" variant="secondary">
               {t('dashboard.browseLogs')}
-            </Link>
+            </LinkButton>
           </>
         )}
-      </div>
+      </Card>
 
       <div className="section">
         <h2 className="section-title">{t('dashboard.overview')}</h2>
         {overviewLoading ? (
-          <div className="loading">{t('dashboard.loadingStats')}</div>
+          <Spinner />
         ) : overview ? (
           <div className="stats-grid">
-            <div className="stat-card card">
+            <Card variant="flat" pad="sm" className="stat-card">
               <div className="stat-value">{overview.totalReviewed.toLocaleString()}</div>
               <div className="stat-label">{t('dashboard.totalReviewed')}</div>
-            </div>
-            <div className="stat-card card">
+            </Card>
+            <Card variant="flat" pad="sm" className="stat-card">
               <div className="stat-value">{overview.totalCorrect.toLocaleString()}</div>
               <div className="stat-label">{t('dashboard.totalCorrect')}</div>
-            </div>
-            <div className="stat-card card">
+            </Card>
+            <Card variant="flat" pad="sm" className="stat-card">
               <div className="stat-value">
                 {overview.totalReviewed > 0
                   ? Math.round((overview.totalCorrect / overview.totalReviewed) * 100)
                   : 0}%
               </div>
               <div className="stat-label">{t('dashboard.accuracy')}</div>
-            </div>
-            <div className="stat-card card">
+            </Card>
+            <Card variant="flat" pad="sm" className="stat-card">
               <div className="stat-value">{overview.currentStreak}</div>
               <div className="stat-label">{t('dashboard.currentStreak')}</div>
-            </div>
-            <div className="stat-card card">
+            </Card>
+            <Card variant="flat" pad="sm" className="stat-card">
               <div className="stat-value">{overview.longestStreak}</div>
               <div className="stat-label">{t('dashboard.longestStreak')}</div>
-            </div>
+            </Card>
           </div>
         ) : null}
       </div>
 
       <div className="section">
         <h2 className="section-title">{t('dashboard.activity')}</h2>
-        <div className="card">
+        <Card variant="elevated" pad="md">
           {heatmapLoading ? (
-            <div className="loading">{t('dashboard.loadingActivity')}</div>
+            <Spinner />
           ) : heatmap ? (
             <Heatmap activities={heatmap} />
           ) : null}
-        </div>
+        </Card>
       </div>
     </div>
   );

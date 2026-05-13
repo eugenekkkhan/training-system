@@ -3,6 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { logsApi, templatesApi } from '../api/client';
+import { Card } from '../components/Card';
+import { Button, LinkButton } from '../components/Button';
+import { Spinner } from '../components/Spinner';
 import type { Log } from '../types';
 
 interface CreateLogFormProps {
@@ -49,63 +52,61 @@ function CreateLogForm({ onClose }: CreateLogFormProps) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal card" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h3>{t('createLog.title')}</h3>
-          <button className="btn-close" onClick={onClose}>x</button>
-        </div>
-        {error && <div className="alert alert-error">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="log-name">{t('createLog.name')}</label>
-            <input
-              id="log-name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t('createLog.namePlaceholder')}
-              required
-              autoFocus
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="log-description">{t('createLog.description')}</label>
-            <textarea
-              id="log-description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={t('createLog.descriptionPlaceholder')}
-              rows={3}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="log-template">{t('createLog.template')}</label>
-            <select
-              id="log-template"
-              value={templateId}
-              onChange={(e) => setTemplateId(e.target.value)}
-            >
-              <option value="">{t('createLog.noTemplate')}</option>
-              {templates?.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
-              {t('createLog.cancel')}
-            </button>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={createMutation.isPending}
-            >
-              {createMutation.isPending ? t('createLog.creating') : t('createLog.create')}
-            </button>
-          </div>
-        </form>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <Card pad="md">
+          <Card.Header>
+            <h3>{t('createLog.title')}</h3>
+            <button className="btn-close" onClick={onClose}>×</button>
+          </Card.Header>
+          {error && <div className="alert alert-error" style={{ marginTop: 16 }}>{error}</div>}
+          <form onSubmit={handleSubmit} style={{ marginTop: 16 }}>
+            <div className="form-group">
+              <label htmlFor="log-name">{t('createLog.name')}</label>
+              <input
+                id="log-name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={t('createLog.namePlaceholder')}
+                required
+                autoFocus
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="log-description">{t('createLog.description')}</label>
+              <textarea
+                id="log-description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={t('createLog.descriptionPlaceholder')}
+                rows={3}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="log-template">{t('createLog.template')}</label>
+              <select
+                id="log-template"
+                value={templateId}
+                onChange={(e) => setTemplateId(e.target.value)}
+              >
+                <option value="">{t('createLog.noTemplate')}</option>
+                {templates?.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <Card.Footer>
+              <Button type="button" variant="ghost" onClick={onClose}>
+                {t('createLog.cancel')}
+              </Button>
+              <Button type="submit" variant="primary" loading={createMutation.isPending}>
+                {createMutation.isPending ? t('createLog.creating') : t('createLog.create')}
+              </Button>
+            </Card.Footer>
+          </form>
+        </Card>
       </div>
     </div>
   );
@@ -131,7 +132,7 @@ function LogCard({ log }: { log: Log }) {
   };
 
   return (
-    <div className="log-card card">
+    <Card variant="elevated" pad="md" className="log-card">
       <div className="log-card-body">
         <div className="log-meta">
           {log.isGlobal && <span className="badge badge-global">{t('logs.global')}</span>}
@@ -144,18 +145,19 @@ function LogCard({ log }: { log: Log }) {
         <p className="log-date">{t('logs.created', { date: new Date(log.createdAt).toLocaleDateString() })}</p>
       </div>
       <div className="log-card-actions">
-        <Link to={`/logs/${log.id}`} className="btn btn-secondary btn-sm">
+        <LinkButton to={`/logs/${log.id}`} variant="secondary" size="sm">
           {t('logs.view')}
-        </Link>
-        <button
-          className="btn btn-danger btn-sm"
+        </LinkButton>
+        <Button
+          variant="danger"
+          size="sm"
           onClick={handleDelete}
-          disabled={deleteMutation.isPending}
+          loading={deleteMutation.isPending}
         >
           {t('logs.delete')}
-        </button>
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -168,13 +170,7 @@ export function Logs() {
     queryFn: logsApi.list,
   });
 
-  if (isLoading) {
-    return (
-      <div className="page">
-        <div className="loading">{t('logs.loading')}</div>
-      </div>
-    );
-  }
+  if (isLoading) return <Spinner />;
 
   if (error) {
     return (
@@ -188,21 +184,21 @@ export function Logs() {
     <div className="page">
       <div className="page-header">
         <h1>{t('logs.title')}</h1>
-        <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
+        <Button variant="primary" onClick={() => setShowCreate(true)}>
           {t('logs.newLog')}
-        </button>
+        </Button>
       </div>
 
       {showCreate && <CreateLogForm onClose={() => setShowCreate(false)} />}
 
       {!logs || logs.length === 0 ? (
-        <div className="card empty-state">
+        <Card variant="flat" pad="lg" className="empty-state">
           <h3>{t('logs.noLogs')}</h3>
           <p>{t('logs.createFirst')}</p>
-          <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
+          <Button variant="primary" onClick={() => setShowCreate(true)} style={{ marginTop: 16 }}>
             {t('logs.createLog')}
-          </button>
-        </div>
+          </Button>
+        </Card>
       ) : (
         <div className="logs-list">
           {logs.map((log) => (

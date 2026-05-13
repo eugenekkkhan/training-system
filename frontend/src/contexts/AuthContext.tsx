@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { User } from '../types';
+import { useTheme } from './ThemeContext';
 
 interface AuthContextValue {
   user: User | null;
@@ -15,14 +16,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { setCustomColors } = useTheme();
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
     if (storedToken && storedUser) {
       try {
+        const parsedUser: User = JSON.parse(storedUser);
         setToken(storedToken);
-        setUser(JSON.parse(storedUser));
+        setUser(parsedUser);
+        setCustomColors(parsedUser.settings?.customColors ?? {});
       } catch {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -36,7 +40,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
-  }, []);
+    setCustomColors(newUser.settings?.customColors ?? {});
+  }, [setCustomColors]);
 
   const logout = useCallback(() => {
     localStorage.removeItem('token');

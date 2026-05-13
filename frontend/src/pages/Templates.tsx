@@ -3,6 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { templatesApi } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
+import { Card } from '../components/Card';
+import { Button } from '../components/Button';
+import { Spinner } from '../components/Spinner';
 import type { Template, TemplateResult } from '../types';
 
 const DEFAULT_CODE = `({ a, b }) => ({
@@ -83,84 +86,86 @@ function TemplateForm({ template, onClose }: TemplateFormProps) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal modal-lg card" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h3>{template ? t('templateForm.edit') : t('templateForm.create')}</h3>
-          <button className="btn-close" onClick={onClose}>x</button>
-        </div>
-        {error && <div className="alert alert-error">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <div className="form-row">
+      <div className="modal modal-lg" onClick={(e) => e.stopPropagation()}>
+        <Card pad="md">
+          <Card.Header>
+            <h3>{template ? t('templateForm.edit') : t('templateForm.create')}</h3>
+            <button className="btn-close" onClick={onClose}>×</button>
+          </Card.Header>
+          {error && <div className="alert alert-error" style={{ marginTop: 16 }}>{error}</div>}
+          <form onSubmit={handleSubmit} style={{ marginTop: 16 }}>
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="tmpl-name">{t('templateForm.name')}</label>
+                <input
+                  id="tmpl-name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={t('templateForm.namePlaceholder')}
+                  required
+                  autoFocus
+                />
+              </div>
+              <div className="form-group form-check-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={isGlobal}
+                    onChange={(e) => setIsGlobal(e.target.checked)}
+                  />
+                  {t('templateForm.global')}
+                </label>
+              </div>
+            </div>
             <div className="form-group">
-              <label htmlFor="tmpl-name">{t('templateForm.name')}</label>
+              <label htmlFor="tmpl-description">{t('templateForm.description')}</label>
               <input
-                id="tmpl-name"
+                id="tmpl-description"
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={t('templateForm.namePlaceholder')}
-                required
-                autoFocus
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={t('templateForm.descriptionPlaceholder')}
               />
             </div>
-            <div className="form-group form-check-group">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={isGlobal}
-                  onChange={(e) => setIsGlobal(e.target.checked)}
-                />
-                {t('templateForm.global')}
-              </label>
+            <div className="form-group">
+              <label htmlFor="tmpl-code">{t('templateForm.code')}</label>
+              <textarea
+                id="tmpl-code"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                rows={8}
+                className="code-editor"
+                placeholder={DEFAULT_CODE}
+                required
+              />
             </div>
-          </div>
-          <div className="form-group">
-            <label htmlFor="tmpl-description">{t('templateForm.description')}</label>
-            <input
-              id="tmpl-description"
-              type="text"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={t('templateForm.descriptionPlaceholder')}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="tmpl-code">{t('templateForm.code')}</label>
-            <textarea
-              id="tmpl-code"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              rows={8}
-              className="code-editor"
-              placeholder={DEFAULT_CODE}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="tmpl-schema">{t('templateForm.schema')}</label>
-            <textarea
-              id="tmpl-schema"
-              value={inputSchema}
-              onChange={(e) => setInputSchema(e.target.value)}
-              rows={6}
-              className="code-editor"
-              placeholder={DEFAULT_SCHEMA}
-              required
-            />
-          </div>
-          <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
-              {t('templateForm.cancel')}
-            </button>
-            <button type="submit" className="btn btn-primary" disabled={isPending}>
-              {isPending
-                ? t('templateForm.saving')
-                : template
-                  ? t('templateForm.save')
-                  : t('templateForm.createBtn')}
-            </button>
-          </div>
-        </form>
+            <div className="form-group">
+              <label htmlFor="tmpl-schema">{t('templateForm.schema')}</label>
+              <textarea
+                id="tmpl-schema"
+                value={inputSchema}
+                onChange={(e) => setInputSchema(e.target.value)}
+                rows={6}
+                className="code-editor"
+                placeholder={DEFAULT_SCHEMA}
+                required
+              />
+            </div>
+            <Card.Footer>
+              <Button type="button" variant="ghost" onClick={onClose}>
+                {t('templateForm.cancel')}
+              </Button>
+              <Button type="submit" variant="primary" loading={isPending}>
+                {isPending
+                  ? t('templateForm.saving')
+                  : template
+                    ? t('templateForm.save')
+                    : t('templateForm.createBtn')}
+              </Button>
+            </Card.Footer>
+          </form>
+        </Card>
       </div>
     </div>
   );
@@ -225,12 +230,17 @@ function TestForm({ template }: TestFormProps) {
           />
         </div>
         {error && <div className="alert alert-error">{error}</div>}
-        <button type="submit" className="btn btn-secondary btn-sm" disabled={testMutation.isPending}>
+        <Button
+          type="submit"
+          variant="secondary"
+          size="sm"
+          loading={testMutation.isPending}
+        >
           {testMutation.isPending ? t('testForm.testing') : t('testForm.test')}
-        </button>
+        </Button>
       </form>
       {result && (
-        <div className="test-result">
+        <Card.Inset style={{ marginTop: 14 }}>
           <div className="test-result-item">
             <strong>{t('testForm.question')}</strong> {result.question}
           </div>
@@ -252,7 +262,7 @@ function TestForm({ template }: TestFormProps) {
               <strong>{t('testForm.choices')}</strong> {result.choices.join(', ')}
             </div>
           )}
-        </div>
+        </Card.Inset>
       )}
     </div>
   );
@@ -285,7 +295,7 @@ function TemplateCard({ template, isAdmin }: TemplateCardProps) {
   return (
     <>
       {editing && <TemplateForm template={template} onClose={() => setEditing(false)} />}
-      <div className="card template-card">
+      <Card variant="elevated" pad="none" className="template-card">
         <div className="template-header" onClick={() => setExpanded((x) => !x)}>
           <div className="template-meta">
             <div className="template-badges">
@@ -299,24 +309,26 @@ function TemplateCard({ template, isAdmin }: TemplateCardProps) {
           <div className="template-actions" onClick={(e) => e.stopPropagation()}>
             {isAdmin && (
               <>
-                <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>
+                <Button variant="secondary" size="sm" onClick={() => setEditing(true)}>
                   {t('templates.edit')}
-                </button>
-                <button
-                  className="btn btn-danger btn-sm"
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
                   onClick={handleDelete}
-                  disabled={deleteMutation.isPending}
+                  loading={deleteMutation.isPending}
                 >
                   {t('templates.delete')}
-                </button>
+                </Button>
               </>
             )}
-            <button
-              className="btn btn-secondary btn-sm"
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setExpanded((x) => !x)}
             >
               {expanded ? t('templates.collapse') : t('templates.expand')}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -333,7 +345,7 @@ function TemplateCard({ template, isAdmin }: TemplateCardProps) {
             <TestForm template={template} />
           </div>
         )}
-      </div>
+      </Card>
     </>
   );
 }
@@ -354,26 +366,26 @@ export function Templates() {
       <div className="page-header">
         <h1>{t('templates.title')}</h1>
         {isAdmin && (
-          <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
+          <Button variant="primary" onClick={() => setShowCreate(true)}>
             {t('templates.newTemplate')}
-          </button>
+          </Button>
         )}
       </div>
 
       {showCreate && <TemplateForm onClose={() => setShowCreate(false)} />}
 
-      {isLoading && <div className="loading">{t('templates.loading')}</div>}
+      {isLoading && <Spinner />}
       {error && <div className="alert alert-error">{t('templates.failed')}</div>}
 
       {!isLoading && templates && templates.length === 0 && (
-        <div className="card empty-state">
+        <Card variant="flat" pad="lg" className="empty-state">
           <h3>{t('templates.noTemplates')}</h3>
           {isAdmin ? (
             <p>{t('templates.noTemplatesAdmin')}</p>
           ) : (
             <p>{t('templates.noTemplatesUser')}</p>
           )}
-        </div>
+        </Card>
       )}
 
       <div className="templates-list">

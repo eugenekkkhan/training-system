@@ -3,7 +3,10 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { logsApi, cardsApi, statsApi, templatesApi } from '../api/client';
-import type { Card, TemplateResult } from '../types';
+import { Card } from '../components/Card';
+import { Button, LinkButton } from '../components/Button';
+import { Spinner } from '../components/Spinner';
+import type { Card as CardType, TemplateResult } from '../types';
 
 function AddCardForm({ logId, onClose }: { logId: string; onClose: () => void }) {
   const [question, setQuestion] = useState('');
@@ -35,45 +38,47 @@ function AddCardForm({ logId, onClose }: { logId: string; onClose: () => void })
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal card" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h3>{t('addCard.title')}</h3>
-          <button className="btn-close" onClick={onClose}>×</button>
-        </div>
-        {error && <div className="alert alert-error">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="card-question">{t('addCard.question')}</label>
-            <textarea
-              id="card-question"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder={t('addCard.questionPlaceholder')}
-              rows={3}
-              required
-              autoFocus
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="card-answer">{t('addCard.answer')}</label>
-            <textarea
-              id="card-answer"
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              placeholder={t('addCard.answerPlaceholder')}
-              rows={2}
-              required
-            />
-          </div>
-          <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
-              {t('addCard.cancel')}
-            </button>
-            <button type="submit" className="btn btn-primary" disabled={createMutation.isPending}>
-              {createMutation.isPending ? t('addCard.adding') : t('addCard.add')}
-            </button>
-          </div>
-        </form>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <Card pad="md">
+          <Card.Header>
+            <h3>{t('addCard.title')}</h3>
+            <button className="btn-close" onClick={onClose}>×</button>
+          </Card.Header>
+          {error && <div className="alert alert-error" style={{ marginTop: 16 }}>{error}</div>}
+          <form onSubmit={handleSubmit} style={{ marginTop: 16 }}>
+            <div className="form-group">
+              <label htmlFor="card-question">{t('addCard.question')}</label>
+              <textarea
+                id="card-question"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                placeholder={t('addCard.questionPlaceholder')}
+                rows={3}
+                required
+                autoFocus
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="card-answer">{t('addCard.answer')}</label>
+              <textarea
+                id="card-answer"
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value)}
+                placeholder={t('addCard.answerPlaceholder')}
+                rows={2}
+                required
+              />
+            </div>
+            <Card.Footer>
+              <Button type="button" variant="ghost" onClick={onClose}>
+                {t('addCard.cancel')}
+              </Button>
+              <Button type="submit" variant="primary" loading={createMutation.isPending}>
+                {createMutation.isPending ? t('addCard.adding') : t('addCard.add')}
+              </Button>
+            </Card.Footer>
+          </form>
+        </Card>
       </div>
     </div>
   );
@@ -109,34 +114,36 @@ function GenerateCardsForm({ logId, onClose }: { logId: string; onClose: () => v
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal card" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h3>{t('generateCards.title')}</h3>
-          <button className="btn-close" onClick={onClose}>×</button>
-        </div>
-        {error && <div className="alert alert-error">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="gen-count">{t('generateCards.count')}</label>
-            <input
-              id="gen-count"
-              type="number"
-              value={count}
-              onChange={(e) => setCount(parseInt(e.target.value) || 1)}
-              min={1}
-              max={100}
-              required
-            />
-          </div>
-          <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
-              {t('generateCards.cancel')}
-            </button>
-            <button type="submit" className="btn btn-primary" disabled={generateMutation.isPending}>
-              {generateMutation.isPending ? t('generateCards.generating') : t('generateCards.generate')}
-            </button>
-          </div>
-        </form>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <Card pad="md">
+          <Card.Header>
+            <h3>{t('generateCards.title')}</h3>
+            <button className="btn-close" onClick={onClose}>×</button>
+          </Card.Header>
+          {error && <div className="alert alert-error" style={{ marginTop: 16 }}>{error}</div>}
+          <form onSubmit={handleSubmit} style={{ marginTop: 16 }}>
+            <div className="form-group">
+              <label htmlFor="gen-count">{t('generateCards.count')}</label>
+              <input
+                id="gen-count"
+                type="number"
+                value={count}
+                onChange={(e) => setCount(parseInt(e.target.value) || 1)}
+                min={1}
+                max={100}
+                required
+              />
+            </div>
+            <Card.Footer>
+              <Button type="button" variant="ghost" onClick={onClose}>
+                {t('generateCards.cancel')}
+              </Button>
+              <Button type="submit" variant="primary" loading={generateMutation.isPending}>
+                {generateMutation.isPending ? t('generateCards.generating') : t('generateCards.generate')}
+              </Button>
+            </Card.Footer>
+          </form>
+        </Card>
       </div>
     </div>
   );
@@ -144,7 +151,7 @@ function GenerateCardsForm({ logId, onClose }: { logId: string; onClose: () => v
 
 // ── Template card preview (lazy-loaded) ───────────────────────────────────────
 
-function TemplateCardPreview({ card }: { card: Card }) {
+function TemplateCardPreview({ card }: { card: CardType }) {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
 
@@ -166,12 +173,12 @@ function TemplateCardPreview({ card }: { card: Card }) {
     <div className="card-template-info">
       <div className="card-template-header">
         <span className="badge badge-template">{t('logDetail.templateCard')}</span>
-        <button type="button" className="btn btn-secondary btn-sm" onClick={toggle}>
+        <Button variant="secondary" size="sm" onClick={toggle}>
           {open ? t('logDetail.hidePreview') : t('logDetail.showPreview')}
-        </button>
+        </Button>
       </div>
       {open && (
-        <div className="card-preview-body">
+        <Card.Inset style={{ marginTop: 10 }}>
           {isFetching && <span className="card-preview-loading">{t('logDetail.previewing')}</span>}
           {error && <span className="card-preview-error">{t('logDetail.previewFailed')}</span>}
           {data && (
@@ -187,7 +194,7 @@ function TemplateCardPreview({ card }: { card: Card }) {
               )}
             </>
           )}
-        </div>
+        </Card.Inset>
       )}
     </div>
   );
@@ -195,7 +202,7 @@ function TemplateCardPreview({ card }: { card: Card }) {
 
 // ── Card row ──────────────────────────────────────────────────────────────────
 
-function CardRow({ card, logId }: { card: Card; logId: string }) {
+function CardRow({ card, logId }: { card: CardType; logId: string }) {
   const [expanded, setExpanded] = useState(false);
   const queryClient = useQueryClient();
   const { t } = useTranslation();
@@ -238,21 +245,22 @@ function CardRow({ card, logId }: { card: Card; logId: string }) {
         </div>
         <div className="card-row-actions">
           {!card.templateId && (
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setExpanded((v) => !v)}
             >
               {expanded ? t('logDetail.collapse') : t('logDetail.expand')}
-            </button>
+            </Button>
           )}
-          <button
-            className="btn btn-danger btn-sm"
+          <Button
+            variant="danger"
+            size="sm"
             onClick={handleDelete}
-            disabled={deleteMutation.isPending}
+            loading={deleteMutation.isPending}
           >
             {t('logs.delete')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -295,7 +303,9 @@ export function LogDetail() {
     return (
       <div className="page">
         <div className="alert alert-error">{t('logDetail.notFound')}</div>
-        <Link to="/logs" className="btn btn-secondary">{t('logDetail.backToLogs')}</Link>
+        <LinkButton to="/logs" variant="secondary" style={{ marginTop: 12 }}>
+          {t('logDetail.backToLogs')}
+        </LinkButton>
       </div>
     );
   }
@@ -310,17 +320,17 @@ export function LogDetail() {
           {log?.description && <p className="page-description">{log.description}</p>}
         </div>
         <div className="page-actions">
-          <Link to={`/study?logId=${logId}`} className="btn btn-primary">
+          <LinkButton to={`/study?logId=${logId}`} variant="primary">
             {t('logDetail.studyLog')}
-          </Link>
+          </LinkButton>
           {log?.templateId && (
-            <button className="btn btn-secondary" onClick={() => setShowGenerate(true)}>
+            <Button variant="secondary" onClick={() => setShowGenerate(true)}>
               {t('logDetail.generateCards')}
-            </button>
+            </Button>
           )}
-          <button className="btn btn-secondary" onClick={() => setShowAddCard(true)}>
+          <Button variant="secondary" onClick={() => setShowAddCard(true)}>
             {t('logDetail.addCard')}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -331,30 +341,30 @@ export function LogDetail() {
         <div className="section">
           <h2 className="section-title">{t('logDetail.statsTitle')}</h2>
           <div className="stats-grid stats-grid-sm">
-            <div className="stat-card card">
+            <Card variant="flat" pad="sm" className="stat-card">
               <div className="stat-value">{logStats.totalCards}</div>
               <div className="stat-label">{t('logDetail.totalCards')}</div>
-            </div>
-            <div className="stat-card card">
+            </Card>
+            <Card variant="flat" pad="sm" className="stat-card">
               <div className="stat-value">{logStats.masteredCards}</div>
               <div className="stat-label">{t('logDetail.mastered')}</div>
-            </div>
-            <div className="stat-card card">
+            </Card>
+            <Card variant="flat" pad="sm" className="stat-card">
               <div className="stat-value">
                 {logStats.retentionRate > 0
                   ? Math.round(logStats.retentionRate * 100) + '%'
                   : 'N/A'}
               </div>
               <div className="stat-label">{t('logDetail.retentionRate')}</div>
-            </div>
-            <div className="stat-card card">
+            </Card>
+            <Card variant="flat" pad="sm" className="stat-card">
               <div className="stat-value">
                 {logStats.averageEaseFactor > 0
                   ? logStats.averageEaseFactor.toFixed(2)
                   : 'N/A'}
               </div>
               <div className="stat-label">{t('logDetail.avgEase')}</div>
-            </div>
+            </Card>
           </div>
         </div>
       )}
@@ -364,11 +374,11 @@ export function LogDetail() {
           {cards ? t('logDetail.cardsCount', { count: cards.length }) : t('logDetail.cardsTitle')}
         </h2>
         {cardsLoading ? (
-          <div className="loading">{t('logDetail.loadingCards')}</div>
+          <Spinner />
         ) : !cards || cards.length === 0 ? (
-          <div className="card empty-state">
+          <Card variant="flat" pad="lg" className="empty-state">
             <p>{t('logDetail.noCards')}</p>
-          </div>
+          </Card>
         ) : (
           <div className="cards-list">
             {cards.map((card) => (
