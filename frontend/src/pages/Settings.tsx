@@ -111,6 +111,7 @@ export function Settings() {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [pushLoading, setPushLoading] = useState(false);
+  const [testNotifSent, setTestNotifSent] = useState(false);
 
   // Local copy of custom colors for live-editing
   const [localColors, setLocalColors] = useState<Record<string, string>>({ ...customColors });
@@ -191,6 +192,17 @@ export function Settings() {
       }
     } else {
       updateMutation.mutate({ notificationsEnabled: false, dailyGoal });
+    }
+  };
+
+  const handleTestNotification = async () => {
+    setTestNotifSent(false);
+    try {
+      await notificationsApi.sendTest();
+      setTestNotifSent(true);
+      setTimeout(() => setTestNotifSent(false), 4000);
+    } catch {
+      setError('Failed to send test notification.');
     }
   };
 
@@ -283,6 +295,14 @@ export function Settings() {
               {pushLoading ? t('settings.settingUpNotifications') : t('settings.notifications')}
             </label>
             <span className="form-hint">{t('settings.notificationsHint')}</span>
+            {notificationsEnabled && (
+              <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Button type="button" size="sm" variant="secondary" onClick={handleTestNotification}>
+                  Send test notification
+                </Button>
+                {testNotifSent && <span style={{ color: 'var(--success)', fontSize: '0.85em' }}>Sent! Check your browser.</span>}
+              </div>
+            )}
           </div>
 
           <div className="form-group">

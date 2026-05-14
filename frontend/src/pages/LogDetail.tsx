@@ -222,7 +222,11 @@ function CardRow({ card, logId }: { card: CardType; logId: string }) {
   };
 
   return (
-    <div className={`card-row${expanded ? ' card-row-expanded' : ''}`}>
+    <Card
+      variant="default"
+      pad="none"
+      style={{ transition: 'border-color 0.15s', ...(expanded && { borderColor: 'var(--primary-light)' }) }}
+    >
       <div className="card-row-main">
         <div className="card-row-content" onClick={() => !card.templateId && setExpanded((v) => !v)}>
           {card.templateId ? (
@@ -263,7 +267,7 @@ function CardRow({ card, logId }: { card: CardType; logId: string }) {
           </Button>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
 

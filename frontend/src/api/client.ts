@@ -185,4 +185,8 @@ export const notificationsApi = {
     const { data } = await api.get('/notifications/vapid-public-key');
     return data;
   },
+  sendTest: async (): Promise<{ ok: boolean; reason?: string }> => {
+    const { data } = await api.post('/notifications/test');
+    return data;
+  },
 };

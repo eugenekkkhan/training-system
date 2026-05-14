@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { authApi } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
+import { Card } from '../components/Card';
+import { Button } from '../components/Button';
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -35,7 +37,7 @@ export function Login() {
 
   return (
     <div className="auth-page">
-      <div className="auth-card card">
+      <Card variant="elevated" pad="lg" className="auth-card">
         <h1 className="auth-title">{t('login.title')}</h1>
         <p className="auth-subtitle">{t('login.subtitle')}</p>
         {error && <div className="alert alert-error">{error}</div>}
@@ -63,9 +65,9 @@ export function Login() {
               required
             />
           </div>
-          <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
+          <Button type="submit" variant="primary" full loading={loading}>
             {loading ? t('login.submitting') : t('login.submit')}
-          </button>
+          </Button>
         </form>
         <p className="auth-footer">
           {t('login.noAccount')} <Link to="/register">{t('login.register')}</Link>
@@ -86,7 +88,7 @@ export function Login() {
             Русский
           </button>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
